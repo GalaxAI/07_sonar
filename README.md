@@ -3,11 +3,11 @@
 ## Task 7: Sonar Integration
 
 ### Requirements
-- [ ] Add a letter to the appropriate server application code in Git hooks.
+- [x] Add a letter to the appropriate server application code in Git hooks.
 - [x] Eliminate all bugs in the server application code (as reported by SonarQube).
 - [x] Eliminate all code smells in the server application code (as reported by SonarQube).
 - [x] Eliminate all vulnerabilities and security hotspots in the server application code (as reported by SonarQube).
-- [ ] Eliminate all bugs and code smells in the client application code (as reported by SonarQube).
+- [x] Eliminate all bugs and code smells in the client application code (as reported by SonarQube).
 
 ### SonarQube Widgets
 
