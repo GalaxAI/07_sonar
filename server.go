@@ -10,6 +10,17 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	ErrInvalidProductID  = "Invalid product ID"
+	ErrInvalidCartID     = "Invalid cart ID"
+	ErrInvalidCategoryID = "Invalid category ID"
+	ErrProductNotFound   = "Product not found"
+	ErrCartNotFound      = "Cart not found"
+	ErrCategoryNotFound  = "Category not found"
+	// Routes 
+	RouteProductsID = "/products/:id"
+)
+
 func addCORS(next echo.HandlerFunc) echo.HandlerFunc {
     return func(c echo.Context) error {
         c.Response().Header().Set("Access-Control-Allow-Origin", "*")
@@ -96,22 +107,22 @@ func CreateCategory(c echo.Context) error {
 func AddCategoryToProduct(c echo.Context) error {
 	productID, err := strconv.Atoi(c.Param("product_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid product ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidProductID)
 	}
 
 	categoryID, err := strconv.Atoi(c.Param("category_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid category ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidCategoryID)
 	}
 
 	var product Product
 	if err := db.First(&product, productID).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrProductNotFound)
 	}
 
 	var category Category
 	if err := db.First(&category, categoryID).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Category not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrCategoryNotFound)
 	}
 
 	if err := db.Model(&product).Association("Categories").Append(&category); err != nil {
@@ -148,13 +159,13 @@ func GetProducts(c echo.Context) error {
 func GetProduct(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid product ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidProductID)
 	}
 
 	var product Product
 	result := db.First(&product, id)
 	if result.Error != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrProductNotFound)
 	}
 	return c.JSON(http.StatusOK, product)
 }
@@ -177,7 +188,7 @@ func CreateProduct(c echo.Context) error {
 func UpdateProduct(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid product ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidProductID)
 	}
 
 	var product Product
@@ -188,7 +199,7 @@ func UpdateProduct(c echo.Context) error {
 	// First check if product exists
 	var existing Product
 	if err := db.First(&existing, id).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrProductNotFound)
 	}
 
 	product.ID = id
@@ -203,7 +214,7 @@ func UpdateProduct(c echo.Context) error {
 func DeleteProduct(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid product ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidProductID)
 	}
 
 	result := db.Delete(&Product{}, id)
@@ -211,7 +222,7 @@ func DeleteProduct(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete product")
 	}
 	if result.RowsAffected == 0 {
-		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrProductNotFound)
 	}
 	return c.NoContent(http.StatusNoContent)
 }
@@ -228,13 +239,13 @@ func GetCarts(c echo.Context) error {
 func GetCart(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid cart ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidCartID)
 	}
 
 	var cart Cart
 	result := db.Preload("Products").First(&cart, id)
 	if result.Error != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Cart not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrCartNotFound)
 	}
 	return c.JSON(http.StatusOK, cart)
 }
@@ -255,22 +266,22 @@ func CreateCart(c echo.Context) error {
 func AddProductToCart(c echo.Context) error {
 	cartID, err := strconv.Atoi(c.Param("cart_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid cart ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidCartID)
 	}
 
 	productID, err := strconv.Atoi(c.Param("product_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid product ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidProductID)
 	}
 
 	var cart Cart
 	if err := db.First(&cart, cartID).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Cart not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrCartNotFound)
 	}
 
 	var product Product
 	if err := db.First(&product, productID).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrProductNotFound)
 	}
 
 	if err := db.Model(&cart).Association("Products").Append(&product); err != nil {
@@ -283,22 +294,22 @@ func AddProductToCart(c echo.Context) error {
 func RemoveProductFromCart(c echo.Context) error {
 	cartID, err := strconv.Atoi(c.Param("cart_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid cart ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidCartID)
 	}
 
 	productID, err := strconv.Atoi(c.Param("product_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid product ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidProductID)
 	}
 
 	var cart Cart
 	if err := db.First(&cart, cartID).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Cart not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrCartNotFound)
 	}
 
 	var product Product
 	if err := db.First(&product, productID).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrProductNotFound)
 	}
 
 	if err := db.Model(&cart).Association("Products").Delete(&product); err != nil {
@@ -311,7 +322,7 @@ func RemoveProductFromCart(c echo.Context) error {
 func DeleteCart(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid cart ID")
+		return echo.NewHTTPError(http.StatusBadRequest, ErrInvalidCartID)
 	}
 
 	result := db.Delete(&Cart{}, id)
@@ -319,7 +330,7 @@ func DeleteCart(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete cart")
 	}
 	if result.RowsAffected == 0 {
-		return echo.NewHTTPError(http.StatusNotFound, "Cart not found")
+		return echo.NewHTTPError(http.StatusNotFound, ErrCartNotFound)
 	}
 	return c.NoContent(http.StatusNoContent)
 }
@@ -343,10 +354,10 @@ func main() {
 
 	// Product Routes
 	e.GET("/products", GetProducts)
-	e.GET("/products/:id", GetProduct)
+	e.GET(RouteProductsID, GetProduct)
 	e.POST("/products", CreateProduct)
-	e.PUT("/products/:id", UpdateProduct)
-	e.DELETE("/products/:id", DeleteProduct)
+	e.PUT(RouteProductsID, UpdateProduct)
+	e.DELETE(RouteProductsID, DeleteProduct)
 
 	// Cart Routes
 	e.GET("/carts", GetCarts)
