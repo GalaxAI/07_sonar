@@ -17,18 +17,19 @@ const (
 	ErrProductNotFound   = "Product not found"
 	ErrCartNotFound      = "Cart not found"
 	ErrCategoryNotFound  = "Category not found"
-	// Routes 
+	// Routes
 	RouteProductsID = "/products/:id"
 )
 
 func addCORS(next echo.HandlerFunc) echo.HandlerFunc {
-    return func(c echo.Context) error {
-        c.Response().Header().Set("Access-Control-Allow-Origin", "*")
-        c.Response().Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        c.Response().Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        return next(c)
-    }
+	return func(c echo.Context) error {
+		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+		c.Response().Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Response().Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		return next(c)
+	}
 }
+
 // Category represents a product category
 type Category struct {
 	gorm.Model
@@ -51,7 +52,6 @@ type Cart struct {
 	ID       int       `json:"id" gorm:"primaryKey;autoIncrement"`
 	Products []Product `json:"products" gorm:"many2many:cart_products;"`
 }
-
 
 var db *gorm.DB
 
@@ -153,7 +153,6 @@ func GetProducts(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, products)
 }
-
 
 // GetProduct returns a single product by ID
 func GetProduct(c echo.Context) error {
@@ -341,11 +340,10 @@ func main() {
 	e := echo.New()
 	e.Use(addCORS)
 
-
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-        AllowOrigins: []string{"*"},
-        AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
-    }))
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
+	}))
 
 	// Category Routes
 	e.GET("/categories", GetCategories)

@@ -1,0 +1,8 @@
+# .pre-commit-config.yaml
+# See https://pre-commit.com for more information
+
+repos:
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
